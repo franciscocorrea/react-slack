@@ -1,12 +1,42 @@
 import React, { Component } from "react";
-import { Grid, Form, Segment, Button, Header, Icon, Message } from "semantic-ui-react";
+import {
+  Grid,
+  Form,
+  Segment,
+  Button,
+  Header,
+  Icon,
+  Message
+} from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import firebase from "../../firebase";
 
 class Register extends Component {
-  state = {};
+  state = {
+    username: "",
+    email: "",
+    password: "",
+    repeatPassword: ""
+  };
 
-  handleChange = () => {};
+  handleChange = event => {
+    this.setState({ [event.target.name]: event.target.value });
+  };
+
+  handleSubmit = event => {
+    event.preventDefault();
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(this.state.email, this.state.password)
+      .then(userCreated => {
+        console.log(userCreated);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
   render() {
+    const { username, email, password, repeatPassword } = this.state;
     return (
       <Grid textAlign="center" verticalAlign="middle" className="app">
         <Grid.Column style={{ maxWidth: 450 }}>
@@ -14,7 +44,7 @@ class Register extends Component {
             <Icon name="puzzle piece" color="orange" />
             Register for DevChat
           </Header>
-          <Form size="large">
+          <Form onSubmit={this.handleSubmit} size="large">
             <Segment stacked>
               <Form.Input
                 fluid
@@ -23,6 +53,7 @@ class Register extends Component {
                 iconPosition="left"
                 placeholder="Username"
                 onChange={this.handleChange}
+                value={username}
                 type="text"
               />
               <Form.Input
@@ -32,6 +63,7 @@ class Register extends Component {
                 iconPosition="left"
                 placeholder="Email Address"
                 onChange={this.handleChange}
+                value={email}
                 type="text"
               />
               <Form.Input
@@ -41,15 +73,17 @@ class Register extends Component {
                 iconPosition="left"
                 placeholder="Password"
                 onChange={this.handleChange}
+                value={password}
                 type="password"
               />
               <Form.Input
                 fluid
-                name="repeat_password"
+                name="repeatPassword"
                 icon="repeat"
                 iconPosition="left"
                 placeholder="Repeat Password"
                 onChange={this.handleChange}
+                value={repeatPassword}
                 type="password"
               />
               <Button color="orange" fluid size="large">
@@ -57,7 +91,9 @@ class Register extends Component {
               </Button>
             </Segment>
           </Form>
-          <Message>Already User?<Link to="/login">Login</Link></Message>
+          <Message>
+            Already User?<Link to="/login">Login</Link>
+          </Message>
         </Grid.Column>
       </Grid>
     );
