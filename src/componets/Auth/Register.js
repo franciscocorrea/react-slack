@@ -100,7 +100,6 @@ class Register extends Component {
             .then(() => {
               this.saveUser(userCreated)
                 .then(() => {
-                  console.log("user saved");
                   this.setState({
                     loading: false,
                     username: "",
@@ -110,7 +109,6 @@ class Register extends Component {
                   });
                 })
                 .catch(error => {
-                  console.error(error);
                   this.setState({
                     errors: this.state.errors.concat(error),
                     loading: false
