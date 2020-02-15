@@ -14,17 +14,27 @@ import {
   Route,
   withRouter
 } from "react-router-dom";
+import Spinner from './Spinner';
+
+import { createStore } from "redux";
+import { Provider, connect } from "react-redux";
+import { composeWithDevTools } from "redux-devtools-extension";
+import rootReducer from "./reducers";
+import { setUser } from "./actions";
+
+const store = createStore(rootReducer, composeWithDevTools());
 
 class Root extends Component {
   componentDidMount() {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
+        this.props.setUser(user);
         this.props.history.push("/");
       }
     });
   }
   render() {
-    return (
+    return this.props.isLoading ? <Spinner /> : (
       <Switch>
         <Route exact path="/" component={App} />
         <Route path="/login" component={Login} />
@@ -34,12 +44,18 @@ class Root extends Component {
   }
 }
 
-const RootWithAuth = withRouter(Root);
+const mapStateToProps = state => ({
+    isLoading: state.user.isLoading
+})
+
+const RootWithAuth = withRouter(connect(mapStateToProps, { setUser })(Root));
 
 ReactDOM.render(
-  <Router>
-    <RootWithAuth />
-  </Router>,
+  <Provider store={store}>
+    <Router>
+      <RootWithAuth />
+    </Router>
+  </Provider>,
   document.getElementById("root")
 );
 registerServiceWorker();
