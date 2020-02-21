@@ -6,12 +6,14 @@ import { Menu, Icon, Form, Input, Button, Modal } from "semantic-ui-react";
 
 class Channel extends Component {
   state = {
+    activeChannel: "",
     user: this.props.currentUser,
     channels: [],
     channelName: "",
     channelDetail: "",
     channelsRef: firebase.database().ref("channels"),
-    modal: false
+    modal: false,
+    firstLoad: true
   };
 
   componentDidMount() {
@@ -23,9 +25,17 @@ class Channel extends Component {
 
     this.state.channelsRef.on("child_added", snap => {
       loadedChannels.push(snap.val());
-      console.log(loadedChannels);
-      this.setState({ channels: loadedChannels });
+      this.setState({ channels: loadedChannels }, () => this.setFirstChannel());
     });
+  };
+
+  setFirstChannel = () => {
+    const firstChannel = this.state.channels[0];
+    if (this.state.firstLoad && this.state.channels.length > 0) {
+      this.props.setCurrentChannel(firstChannel);
+      this.setActiveChannel(firstChannel);
+    }
+    this.setState({ firstLoad: false });
   };
 
   addChannel = () => {
@@ -76,7 +86,12 @@ class Channel extends Component {
   closeModal = () => this.setState({ modal: false });
 
   changeChannel = channel => {
+    this.setActiveChannel(channel);
     this.props.setCurrentChannel(channel);
+  };
+
+  setActiveChannel = channel => {
+    this.setState({ activeChannel: channel.id });
   };
 
   displayChannels = channels =>
@@ -86,7 +101,8 @@ class Channel extends Component {
         key={channel.id}
         onClick={() => this.changeChannel(channel)}
         name={channel.name}
-        style={{ opacity: 0.7 }}>
+        style={{ opacity: 0.7 }}
+        active={channel.id === this.state.activeChannel}>
         # {channel.name}
       </Menu.Item>
     ));
